@@ -187,7 +187,7 @@ local function playerShootingLoop()
             if IsPedShooting(cache.ped) and not config.whitelistedWeapons[cache.weapon] then
                 shotsFired += 1
 
-                if shotsFired > sharedConfig.statuses.gsr.threshold and not recentlyGSR and math.random(1, 100) <= config.statuses.gsr.chance then
+                if shotsFired > sharedConfig.statuses.gsr.threshold and not recentlyGSR and math.random() <= config.statuses.gsr.chance then
                     TriggerServerEvent('qbx_evidence:server:setGSR')
 
                     recentlyGSR = true
