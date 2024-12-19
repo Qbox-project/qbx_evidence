@@ -1,6 +1,5 @@
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
-local playerStatuses = {}
 local casings = {}
 local currentCasing = nil
 local bloodDrops = {}
@@ -8,6 +7,7 @@ local currentBloodDrop = nil
 local fingerprints = {}
 local currentFingerprint = 0
 local shotsFired = 0
+local recentlyGSR = false
 
 local function dropBulletCasing()
     local randX = math.random() + math.random(-1, 1)
@@ -187,13 +187,25 @@ local function playerShootingLoop()
             if IsPedShooting(cache.ped) and not config.whitelistedWeapons[cache.weapon] then
                 shotsFired += 1
 
-                if shotsFired > sharedConfig.statuses.gsr.threshold then
-                    if math.random(1, 100) <= config.statuses.gsr.chance then
-                        TriggerServerEvent('qbx_evidence:server:setGSR')
-                    end
+                if shotsFired > sharedConfig.statuses.gsr.threshold and not recentlyGSR and math.random(1, 100) <= config.statuses.gsr.chance then
+                    TriggerServerEvent('qbx_evidence:server:setGSR')
+
+                    recentlyGSR = true
+
+                    SetTimeout(sharedConfig.statuses.gsr.cooldown, function()
+                        recentlyGSR = false
+                    end)
                 end
 
                 dropBulletCasing()
+            end
+
+            if not recentlyGSR and shotsFired ~= 0 then
+                local delay = math.random(5000, 10000)
+
+                SetTimeout(sharedConfig.statuses.gsr.cooldown + delay, function()
+                    shotsFired = math.max(shotsFired - 1, 0)
+                end)
             end
 
             Wait(0)

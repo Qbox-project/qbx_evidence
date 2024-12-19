@@ -2,6 +2,7 @@ local sharedConfig = require 'config.shared'
 local casings = {}
 local bloodDrops = {}
 local fingerDrops = {}
+local playerGSR = {}
 
 local function generateId(table)
     local id = lib.string.random('11111')
@@ -12,19 +13,19 @@ local function generateId(table)
     return id
 end
 
+---@param source integer
+---@return boolean
+local function hasGSR(source)
+    return playerGSR[source] and playerGSR[source] > os.time()
+end
+exports('HasGSR', hasGSR)
+
+AddEventHandler('QBCore:Server:OnPlayerUnload', function(source)
+    playerGSR[source] = nil
+end)
+
 RegisterNetEvent('qbx_evidence:server:setGSR', function()
-    local src = source
-    local timer
-
-    if Player(src).state.gsr then
-        timer:restart()
-    else
-        Player(src).state:set('gsr', true, true)
-
-        timer = lib.timer(sharedConfig.statuses.gsr.duration, function()
-            Player(src).state:set('gsr', false, true)
-        end, true)
-    end
+    playerGSR[source] = os.time() + sharedConfig.statuses.gsr.duration
 end)
 
 RegisterNetEvent('evidence:server:CreateBloodDrop', function(citizenid, bloodtype, coords)
@@ -130,5 +131,17 @@ RegisterNetEvent('qbx_evidence:server:addCasingToInventory', function(casingId, 
     if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
         TriggerClientEvent('qbx_evidence:client:removeCasing', -1, casingId)
         casings[casingId] = nil
+    end
+end)
+
+CreateThread(function()
+    while true do
+        for source, expiration in pairs(playerGSR) do
+            if os.time() >= expiration then
+                playerGSR[source] = nil
+            end
+        end
+
+        Wait(1000)
     end
 end)
