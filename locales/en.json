@@ -1,13 +1,15 @@
 {
+  "casing": {
+    "label": "Bullet casing",
+    "caliber": "Caliber"
+  },
+  "collector": "Collected by",
+  "location": "Found at",
   "canceled": "Canceled",
   "clearing_blood": "Clearing blood...",
   "blood_cleared": "Cleared blood!",
   "blood": "Blood",
   "blood_text": "[~g~G~s~] Blood %s",
-  "clearing_casing": "Clearing casing...",
-  "casing_cleared": "Cleared casing!",
-  "casing": "Bullet casing",
-  "bullet_casing": "[~g~G~s~] Bullet Casing %s",
   "clearing_fingerprint": "Clearing fingerprint...",
   "fingerprint_cleared": "Cleared fingerprint!",
   "fingerprint": "Fingerprint",

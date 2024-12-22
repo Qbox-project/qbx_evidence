@@ -1,7 +1,7 @@
 local config = require 'config.client'
 local sharedConfig = require 'config.shared'
 local casings = {}
-local currentCasing = nil
+local currentCasing = 0
 local bloodDrops = {}
 local currentBloodDrop = nil
 local fingerprints = {}
@@ -9,13 +9,41 @@ local currentFingerprint = 0
 local shotsFired = 0
 local recentlyGSR = false
 
+exports.ox_inventory:displayMetadata({
+    collector = locale('collector'),
+    location = locale('location'),
+    caliber = locale('casing.caliber'),
+})
+
 local function dropBulletCasing()
     local randX = math.random() + math.random(-1, 1)
     local randY = math.random() + math.random(-1, 1)
     local coords = GetOffsetFromEntityInWorldCoords(cache.ped, randX, randY, 0)
-    local serial = exports.ox_inventory:getCurrentWeapon().metadata.serial
-    TriggerServerEvent('evidence:server:CreateCasing', cache.weapon, serial, coords)
-    Wait(300)
+
+    TriggerServerEvent('qbx_evidence:server:createCasing', coords)
+end
+
+---@param casingId integer
+local function drawCasing(casingId)
+    local coords = GetEntityCoords(cache.ped)
+
+    if #(coords - casings[casingId].coords) >= 1.5 then return end
+
+    qbx.drawText3d({
+        text = ('[~g~G~s~] %s'):format(locale('casing.label')),
+        coords = casings[casingId].coords
+    })
+
+    local streets = qbx.getStreetName(casings[casingId].coords)
+    local zone = qbx.getZoneName(casings[casingId].coords)
+    local location = {
+        main = streets.main,
+        zone = zone
+    }
+
+    if IsControlJustReleased(0, 47) then
+        TriggerServerEvent('qbx_evidence:server:collectCasing', casingId, location)
+    end
 end
 
 local function dnaHash(s)
@@ -58,14 +86,6 @@ local function drawEvidenceIfInRange(args)
     if IsControlJustReleased(0, 47) then
         TriggerServerEvent(args.serverEventOnPickup, args.evidenceId, args.metadata)
     end
-end
-
-local function canDiscoverEvidence()
-    return LocalPlayer.state.isLoggedIn
-    and QBX.PlayerData.job.type == 'leo'
-    and QBX.PlayerData.job.onduty
-    and IsPlayerFreeAiming(cache.playerId)
-    and cache.weapon == `WEAPON_FLASHLIGHT`
 end
 
 ---@param evidence table<number, {coords: vector3}>
@@ -136,12 +156,8 @@ RegisterNetEvent('qbx_evidence:client:clearBloodDropsInArea', function()
     end
 end)
 
-RegisterNetEvent('qbx_evidence:client:addCasing', function(casingId, weapon, coords, serie)
-    casings[casingId] = {
-        type = weapon,
-        serie = serie and serie or locale('serial_not_visible'),
-        coords = vec3(coords.x, coords.y, coords.z - 0.9)
-    }
+RegisterNetEvent('qbx_evidence:client:addCasing', function(casingId, newCasing)
+    casings[casingId] = newCasing
 end)
 
 RegisterNetEvent('qbx_evidence:client:removeCasing', function(casingId)
@@ -149,42 +165,27 @@ RegisterNetEvent('qbx_evidence:client:removeCasing', function(casingId)
     currentCasing = 0
 end)
 
-RegisterNetEvent('qbx_evidence:client:clearCasingsInArea', function()
-    local pos = GetEntityCoords(cache.ped)
-    local casingList = {}
+local function flashlightLoop()
+    CreateThread(function()
+        while cache.weapon do
+            local sleep = 1000
 
-    if lib.progressCircle({
-        duration = 5000,
-        position = 'bottom',
-        label = locale('clearing_casing'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            move = false,
-            car = false,
-            combat = true,
-            mouse = false,
-        }
-    })
-    then
-        if casings and next(casings) then
-            for casingId in pairs(casings) do
-                if #(pos - casings[casingId].coords) < 10.0 then
-                    casingList[#casingList + 1] = casingId
-                end
+            if IsPlayerFreeAiming(cache.playerId) then
+                sleep = 10
+                currentCasing = getCloseEvidence(casings) or currentCasing
+                currentBloodDrop = getCloseEvidence(bloodDrops) or currentBloodDrop
+                currentFingerprint = getCloseEvidence(fingerprints) or currentFingerprint
             end
-            TriggerServerEvent('qbx_evidence:server:clearCasings', casingList)
-            exports.qbx_core:Notify(locale('casing_cleared'), 'success')
+
+            Wait(sleep)
         end
-    else
-        exports.qbx_core:Notify(locale('canceled'), 'error')
-    end
-end)
+    end)
+end
 
 local function playerShootingLoop()
     CreateThread(function()
         while cache.weapon do
-            if IsPedShooting(cache.ped) and not config.whitelistedWeapons[cache.weapon] then
+            if IsPedShooting(cache.ped) then
                 shotsFired += 1
 
                 if shotsFired > sharedConfig.statuses.gsr.threshold and not recentlyGSR and math.random() <= config.statuses.gsr.chance then
@@ -214,9 +215,19 @@ local function playerShootingLoop()
 end
 
 lib.onCache('weapon', function(weapon)
-    if not weapon or weapon == `WEAPON_UNARMED` or GetWeapontypeGroup(weapon) == 3566412244 then return end
+    if not weapon then return end
 
-    playerShootingLoop()
+    if QBX.PlayerData.job.type ~= 'leo' then
+        local weaponTypeGroup = GetWeapontypeGroup(weapon)
+
+        if config.blacklistedWeaponGroups[weaponTypeGroup] then return end
+
+        playerShootingLoop()
+    else
+        if not QBX.PlayerData.job.onduty or weapon ~= `WEAPON_FLASHLIGHT` then return end
+
+        flashlightLoop()
+    end
 end)
 
 --- draw 3D text on the ground to show evidence, if they press pickup button, set metadata and add it to their inventory.
@@ -224,19 +235,7 @@ CreateThread(function()
     while true do
         Wait(0)
         if currentCasing and currentCasing ~= 0 then
-            drawEvidenceIfInRange({
-                evidenceId = currentCasing,
-                coords = casings[currentCasing].coords,
-                text = locale('bullet_casing', casings[currentCasing].type),
-                metadata = {
-                    type = locale('casing'),
-                    street = getStreetLabel(casings[currentCasing].coords),
-                    ammolabel = config.ammoLabels[exports.qbx_core:GetWeapons()[casings[currentCasing].type].ammotype],
-                    ammotype = casings[currentCasing].type,
-                    serie = casings[currentCasing].serie
-                },
-                serverEventOnPickup = 'qbx_evidence:server:addCasingToInventory'
-            })
+            drawCasing(currentCasing)
         end
 
         if currentBloodDrop and currentBloodDrop ~= 0 then
@@ -267,18 +266,5 @@ CreateThread(function()
                 serverEventOnPickup = 'qbx_evidence:server:addFingerprintToInventory'
             })
         end
-    end
-end)
-
-CreateThread(function()
-    while true do
-        local closeEvidenceSleep = 1000
-        if canDiscoverEvidence() then
-            closeEvidenceSleep = 10
-            currentCasing = getCloseEvidence(casings) or currentCasing
-            currentBloodDrop = getCloseEvidence(bloodDrops) or currentBloodDrop
-            currentFingerprint = getCloseEvidence(fingerprints) or currentFingerprint
-        end
-        Wait(closeEvidenceSleep)
     end
 end)
