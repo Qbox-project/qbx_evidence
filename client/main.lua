@@ -217,16 +217,16 @@ end
 lib.onCache('weapon', function(weapon)
     if not weapon then return end
 
-    if QBX.PlayerData.job.type ~= 'leo' then
+    if QBX.PlayerData.job.type == 'leo' then
+        if not QBX.PlayerData.job.onduty or weapon ~= `WEAPON_FLASHLIGHT` then return end
+
+        flashlightLoop()
+    else
         local weaponTypeGroup = GetWeapontypeGroup(weapon)
 
         if config.blacklistedWeaponGroups[weaponTypeGroup] then return end
 
         playerShootingLoop()
-    else
-        if not QBX.PlayerData.job.onduty or weapon ~= `WEAPON_FLASHLIGHT` then return end
-
-        flashlightLoop()
     end
 end)
 
