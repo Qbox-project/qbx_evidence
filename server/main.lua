@@ -110,7 +110,7 @@ RegisterNetEvent('qbx_evidence:server:collectBlood', function(dropId, location)
     bloodDrops[dropId] = nil
 end)
 
-RegisterNetEvent('qbx_evidence:server:createBloodDrop', function(coords)
+RegisterNetEvent('qbx_evidence:server:createFingerprint', function(coords)
     local fingerprint = exports.qbx_core:GetMetadata(source, 'fingerprint')
     local printId = lib.string.random('111111')
     local printData = {
