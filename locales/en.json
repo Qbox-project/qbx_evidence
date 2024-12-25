@@ -3,18 +3,19 @@
     "label": "Bullet casing",
     "caliber": "Caliber"
   },
+  "blood": {
+    "label": "Blood drop"
+  },
+  "print": {
+    "label": "Fingerprint"
+  },
   "collector": "Collected by",
   "location": "Found at",
   "canceled": "Canceled",
-  "clearing_blood": "Clearing blood...",
-  "blood_cleared": "Cleared blood!",
-  "blood": "Blood",
-  "blood_text": "[~g~G~s~] Blood %s",
   "clearing_fingerprint": "Clearing fingerprint...",
   "fingerprint_cleared": "Cleared fingerprint!",
   "fingerprint": "Fingerprint",
   "fingerprint_text": "[~g~G~s~] Fingerprint %s",
-  "serial_not_visible": "Serial number is not visible...",
   "statuses": {
     "red_hands": "Red hands",
     "wide_pupils": "Wide Pupils",
@@ -28,7 +29,6 @@
     "confused": "Confused",
     "alcohol": "Smells like alcohol",
     "heavy_alcohol": "Smells very much like alcohol",
-    "agitated": "Agitated - Signs of Meth Use",
-    "serial_not_visible": "Serial number not visible..."
+    "agitated": "Agitated - Signs of Meth Use"
   }
 }

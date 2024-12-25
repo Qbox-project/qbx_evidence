@@ -3,7 +3,7 @@ local sharedConfig = require 'config.shared'
 local casings = {}
 local currentCasing = 0
 local bloodDrops = {}
-local currentBloodDrop = nil
+local currentBloodDrop = 0
 local fingerprints = {}
 local currentFingerprint = 0
 local shotsFired = 0
@@ -13,6 +13,7 @@ exports.ox_inventory:displayMetadata({
     collector = locale('collector'),
     location = locale('location'),
     caliber = locale('casing.caliber'),
+    bloodType = locale('blood.bloodtype')
 })
 
 local function dropBulletCasing()
@@ -34,23 +35,39 @@ local function drawCasing(casingId)
         coords = casings[casingId].coords
     })
 
-    local streets = qbx.getStreetName(casings[casingId].coords)
-    local zone = qbx.getZoneName(casings[casingId].coords)
-    local location = {
-        main = streets.main,
-        zone = zone
-    }
-
     if IsControlJustReleased(0, 47) then
+        local streets = qbx.getStreetName(casings[casingId].coords)
+        local zone = qbx.getZoneName(casings[casingId].coords)
+        local location = {
+            main = streets.main,
+            zone = zone
+        }
+
         TriggerServerEvent('qbx_evidence:server:collectCasing', casingId, location)
     end
 end
 
-local function dnaHash(s)
-    local h = string.gsub(s, '.', function(c)
-        return string.format('%02x', string.byte(c))
-    end)
-    return h
+---@param dropId integer
+local function drawBloodDrop(dropId)
+    local coords = GetEntityCoords(cache.ped)
+
+    if #(coords - bloodDrops[dropId].coords) >= 1.5 then return end
+
+    qbx.drawText3d({
+        text = ('[~g~G~s~] %s'):format(locale('blood.label')),
+        coords = bloodDrops[dropId].coords
+    })
+
+    if IsControlJustReleased(0, 47) then
+        local streets = qbx.getStreetName(bloodDrops[dropId].coords)
+        local zone = qbx.getZoneName(bloodDrops[dropId].coords)
+        local location = {
+            main = streets.main,
+            zone = zone
+        }
+
+        TriggerServerEvent('qbx_evidence:server:collectBlood', dropId, location)
+    end
 end
 
 ---@param coords vector3
@@ -100,16 +117,12 @@ local function getCloseEvidence(evidence)
     end
 end
 
-RegisterNetEvent('qbx_evidence:client:addBloodDrop', function(bloodId, citizenid, bloodtype, coords)
-    bloodDrops[bloodId] = {
-        citizenid = citizenid,
-        bloodtype = bloodtype,
-        coords = vec3(coords.x, coords.y, coords.z - 0.9)
-    }
+RegisterNetEvent('qbx_evidence:client:addBloodDrop', function(dropId, newBlood)
+    bloodDrops[dropId] = newBlood
 end)
 
-RegisterNetEvent('qbx_evidence:client:removeBloodDrop', function(bloodId)
-    bloodDrops[bloodId] = nil
+RegisterNetEvent('qbx_evidence:client:removeBloodDrop', function(dropId)
+    bloodDrops[dropId] = nil
     currentBloodDrop = 0
 end)
 
@@ -123,37 +136,6 @@ end)
 RegisterNetEvent('qbx_evidence:client:removeFingerprint', function(fingerId)
     fingerprints[fingerId] = nil
     currentFingerprint = 0
-end)
-
-RegisterNetEvent('qbx_evidence:client:clearBloodDropsInArea', function()
-    local pos = GetEntityCoords(cache.ped)
-    local bloodDropList = {}
-    if lib.progressCircle({
-        duration = 5000,
-        position = 'bottom',
-        label = locale('clearing_blood'),
-        useWhileDead = false,
-        canCancel = true,
-        disable = {
-            move = false,
-            car = false,
-            combat = true,
-            mouse = false
-        }
-    })
-    then
-        if bloodDrops and next(bloodDrops) then
-            for bloodId in pairs(bloodDrops) do
-                if #(pos - bloodDrops[bloodId].coords) < 10.0 then
-                    bloodDropList[#bloodDropList + 1] = bloodId
-                end
-            end
-            TriggerServerEvent('qbx_evidence:server:clearBloodDrops', bloodDropList)
-            exports.qbx_core:Notify(locale('blood_cleared'), 'success')
-        end
-    else
-        exports.qbx_core:Notify(locale('canceled'), 'error')
-    end
 end)
 
 RegisterNetEvent('qbx_evidence:client:addCasing', function(casingId, newCasing)
@@ -230,7 +212,21 @@ lib.onCache('weapon', function(weapon)
     end
 end)
 
---- draw 3D text on the ground to show evidence, if they press pickup button, set metadata and add it to their inventory.
+AddEventHandler('gameEventTriggered', function(event, args)
+    if event ~= 'CEventNetworkEntityDamage' then return end
+
+    local victim = args[1]
+    local attacker = args[2]
+
+    if not IsPedAPlayer(victim) and not IsPedAPlayer(attacker) then return end
+
+    local randX = math.random() + math.random(-1, 1)
+    local randY = math.random() + math.random(-1, 1)
+    local coords = GetOffsetFromEntityInWorldCoords(cache.ped, randX, randY, 0)
+
+    TriggerServerEvent('qbx_evidence:server:createBloodDrop', coords)
+end)
+
 CreateThread(function()
     while true do
         Wait(0)
@@ -239,18 +235,7 @@ CreateThread(function()
         end
 
         if currentBloodDrop and currentBloodDrop ~= 0 then
-            drawEvidenceIfInRange({
-                evidenceId = currentBloodDrop,
-                coords = bloodDrops[currentBloodDrop].coords,
-                text = locale('blood_text', dnaHash(bloodDrops[currentBloodDrop].citizenid)),
-                metadata = {
-                    type = locale('blood'),
-                    street = getStreetLabel(bloodDrops[currentBloodDrop].coords),
-                    dnalabel = dnaHash(bloodDrops[currentBloodDrop].citizenid),
-                    bloodtype = bloodDrops[currentBloodDrop].bloodtype
-                },
-                serverEventOnPickup = 'qbx_evidence:server:addBloodDropToInventory'
-            })
+            drawBloodDrop(currentBloodDrop)
         end
 
         if currentFingerprint and currentFingerprint ~= 0 then

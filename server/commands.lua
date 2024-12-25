@@ -16,18 +16,6 @@ local function checkLeoAndOnDuty(player, minGrade)
     exports.qbx_core:Notify(player.PlayerData.source, locale('error.on_duty_police_only'), 'error')
 end
 
-lib.addCommand('clearcasings', {help = locale('commands.clear_casign')}, function(source)
-    local player = exports.qbx_core:GetPlayer(source)
-    if not checkLeoAndOnDuty(player) then return end
-    TriggerClientEvent('qbx_evidence:client:clearCasingsInArea', source)
-end)
-
-lib.addCommand('clearblood', {help = locale('commands.clearblood')}, function(source)
-    local player = exports.qbx_core:GetPlayer(source)
-    if not checkLeoAndOnDuty(player) then return end
-    TriggerClientEvent('qbx_evidence:client:clearBloodDropsInArea', source)
-end)
-
 lib.addCommand('takedna', {
     help = locale('commands.takedna'),
     params = {{
