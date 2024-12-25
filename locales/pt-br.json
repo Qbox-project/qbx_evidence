@@ -1,0 +1,32 @@
+{
+    "canceled": "Cancelado",
+    "clearing_blood": "Limpando sangue...",
+    "blood_cleared": "Sangue limpo!",
+    "blood": "Sangue",
+    "blood_text": "[~g~G~s~] Sangue %s",
+    "clearing_casing": "Limpando cápsula...",
+    "casing_cleared": "Cápsula limpa!",
+    "casing": "Cápsula de bala",
+    "bullet_casing": "[~g~G~s~] Cápsula de Bala %s",
+    "clearing_fingerprint": "Limpando impressão digital...",
+    "fingerprint_cleared": "Impressão digital limpa!",
+    "fingerprint": "Impressão digital",
+    "fingerprint_text": "[~g~G~s~] Impressão Digital %s",
+    "serial_not_visible": "Número de série não está visível...",
+    "statuses": {
+      "red_hands": "Mãos vermelhas",
+      "wide_pupils": "Pupilas dilatadas",
+      "red_eyes": "Olhos vermelhos",
+      "weed_smell": "Cheiro de maconha",
+      "gunpowder": "Pólvora na roupa",
+      "chemicals": "Cheiro de produtos químicos",
+      "heavy_breathing": "Respiração pesada",
+      "sweat": "Transpira muito",
+      "handbleed": "Sangue nas mãos",
+      "confused": "Confuso",
+      "alcohol": "Cheiro de álcool",
+      "heavy_alcohol": "Cheiro muito forte de álcool",
+      "agitated": "Agitado - Sinais de uso de metanfetamina",
+      "serial_not_visible": "Número de série não visível..."
+    }
+  }
