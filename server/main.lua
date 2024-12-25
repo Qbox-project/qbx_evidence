@@ -1,17 +1,8 @@
 local sharedConfig = require 'config.shared'
 local casings = {}
 local bloodDrops = {}
-local fingerDrops = {}
+local fingerprints = {}
 local playerGSR = {}
-
-local function generateId(table)
-    local id = lib.string.random('11111')
-    if not table then return id end
-    while table[id] do
-        id = lib.string.random('11111')
-    end
-    return id
-end
 
 ---@param source integer
 ---@return boolean
@@ -78,6 +69,7 @@ RegisterNetEvent('qbx_evidence:server:createBloodDrop', function(coords)
     local bloodType = exports.qbx_core:GetMetadata(source, 'bloodtype')
     local dropId = lib.string.random('111111')
     local bloodData = {
+        label = locale('blood.label'),
         bloodType = bloodType,
         coords = vec3(coords.x, coords.y, coords.z - 0.9),
         created = GetGameTimer(),
@@ -118,31 +110,49 @@ RegisterNetEvent('qbx_evidence:server:collectBlood', function(dropId, location)
     bloodDrops[dropId] = nil
 end)
 
-RegisterNetEvent('qbx_evidence:server:createFingerDrop', function(coords)
-    local player = exports.qbx_core:GetPlayer(source)
-    local fingerId = generateId(fingerDrops)
-    fingerDrops[fingerId] = player.PlayerData.metadata.fingerprint
-    TriggerClientEvent('qbx_evidence:client:addFingerPrint', -1, fingerId, player.PlayerData.metadata.fingerprint, coords)
+RegisterNetEvent('qbx_evidence:server:createBloodDrop', function(coords)
+    local fingerprint = exports.qbx_core:GetMetadata(source, 'fingerprint')
+    local printId = lib.string.random('111111')
+    local printData = {
+        label = locale('print.label'),
+        fingerprint = fingerprint,
+        coords = vec3(coords.x, coords.y, coords.z - 0.9),
+        created = GetGameTimer(),
+    }
+
+    fingerprints[printId] = printData
+
+    TriggerClientEvent('qbx_evidence:client:addFingerprint', -1, printId, printData)
 end)
 
-RegisterNetEvent('qbx_evidence:server:addFingerprintToInventory', function(fingerId, fingerInfo)
+RegisterNetEvent('qbx_evidence:server:collectFingerprint', function(printId, location)
+    if not fingerprints[printId] then return end
+
     local src = source
+    local print = fingerprints[printId]
     local player = exports.qbx_core:GetPlayer(src)
-    local playerName = player.PlayerData.charinfo.firstname..' '..player.PlayerData.charinfo.lastname
-    local streetName = fingerInfo.street
-    local fingerprint = fingerInfo.fingerprint
-    local metadata = {}
-    metadata.type = 'Fingerprint Evidence'
-    metadata.description = 'Fingerprint ID: '..fingerprint
-    metadata.description = metadata.description..'\n\nCollected By: '..playerName
-    metadata.description = metadata.description..'\n\nCollected At: '..streetName
-    if not exports.ox_inventory:RemoveItem(src, 'empty_evidence_bag', 1) then
-        return exports.qbx_core:Notify(src, locale('error.have_evidence_bag'), 'error')
+    local playerPed = GetPlayerPed(src)
+    local playerCoords = GetEntityCoords(playerPed)
+
+    if not player or #(playerCoords - print.coords) > 5.0 then return end
+
+    local name = ('%s %s'):format(player.PlayerData.charinfo.firstname, player.PlayerData.charinfo.lastname)
+    local metadata = {
+        label = locale('print.label'),
+        fingerprint = print.fingerprint,
+        collector = name,
+        location = ('%s, %s'):format(location.main, location.zone),
+    }
+
+    local collected = exports.ox_inventory:AddItem(src, 'evidence', 1, metadata)
+
+    if not collected then
+        exports.qbx_core:Notify(src, 'Your inventory is full...', 'error')
+        return
     end
-    if exports.ox_inventory:AddItem(src, 'filled_evidence_bag', 1, metadata) then
-        TriggerClientEvent('qbx_evidence:client:removeFingerprint', -1, fingerId)
-        fingerDrops[fingerId] = nil
-    end
+
+    TriggerClientEvent('qbx_evidence:client:removeFingerprint', -1, printId)
+    fingerprints[printId] = nil
 end)
 
 CreateThread(function()

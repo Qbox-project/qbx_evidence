@@ -4,7 +4,8 @@
     "caliber": "Caliber"
   },
   "blood": {
-    "label": "Blood drop"
+    "label": "Blood drop",
+    "type": "Blood type"
   },
   "print": {
     "label": "Fingerprint"

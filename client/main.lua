@@ -13,7 +13,8 @@ exports.ox_inventory:displayMetadata({
     collector = locale('collector'),
     location = locale('location'),
     caliber = locale('casing.caliber'),
-    bloodType = locale('blood.bloodtype')
+    bloodType = locale('blood.type'),
+    fingerprint = locale('print.label')
 })
 
 local function dropBulletCasing()
@@ -70,38 +71,26 @@ local function drawBloodDrop(dropId)
     end
 end
 
----@param coords vector3
----@return string
-local function getStreetLabel(coords)
-    local s1, s2 = GetStreetNameAtCoord(coords.x, coords.y, coords.z)
-    local street1 = GetStreetNameFromHashKey(s1)
-    local street2 = GetStreetNameFromHashKey(s2)
-    local streetLabel = street1
-    if street2 then
-        streetLabel = streetLabel .. ' | ' .. street2
-    end
-    local sanitized = streetLabel:gsub("%'", "")
-    return sanitized
-end
+---@param printId integer
+local function drawFingerprint(printId)
+    local coords = GetEntityCoords(cache.ped)
 
-local function getPlayerDistanceFromCoords(coords)
-    local pos = GetEntityCoords(cache.ped)
-    return #(pos - coords)
-end
+    if #(coords - fingerprints[printId].coords) >= 1.5 then return end
 
----@class DrawEvidenceIfInRangeArgs
----@field evidenceId integer
----@field coords vector3
----@field text string
----@field metadata table
----@field serverEventOnPickup string
+    qbx.drawText3d({
+        text = ('[~g~G~s~] %s'):format(locale('print.label')),
+        coords = fingerprints[printId].coords
+    })
 
----@param args DrawEvidenceIfInRangeArgs
-local function drawEvidenceIfInRange(args)
-    if getPlayerDistanceFromCoords(args.coords) >= 1.5 then return end
-    qbx.drawText3d({text = args.text, coords = args.coords})
     if IsControlJustReleased(0, 47) then
-        TriggerServerEvent(args.serverEventOnPickup, args.evidenceId, args.metadata)
+        local streets = qbx.getStreetName(fingerprints[printId].coords)
+        local zone = qbx.getZoneName(fingerprints[printId].coords)
+        local location = {
+            main = streets.main,
+            zone = zone
+        }
+
+        TriggerServerEvent('qbx_evidence:server:collectFingerprint', printId, location)
     end
 end
 
@@ -126,11 +115,8 @@ RegisterNetEvent('qbx_evidence:client:removeBloodDrop', function(dropId)
     currentBloodDrop = 0
 end)
 
-RegisterNetEvent('qbx_evidence:client:addFingerPrint', function(fingerId, fingerprint, coords)
-    fingerprints[fingerId] = {
-        fingerprint = fingerprint,
-        coords = vec3(coords.x, coords.y, coords.z - 0.9)
-    }
+RegisterNetEvent('qbx_evidence:client:addFingerprint', function(printId, newPrint)
+    fingerprints[printId] = newPrint
 end)
 
 RegisterNetEvent('qbx_evidence:client:removeFingerprint', function(fingerId)
@@ -239,17 +225,7 @@ CreateThread(function()
         end
 
         if currentFingerprint and currentFingerprint ~= 0 then
-            drawEvidenceIfInRange({
-                evidenceId = currentFingerprint,
-                coords = fingerprints[currentFingerprint].coords,
-                text = locale('fingerprint_text'),
-                metadata = {
-                    type = locale('fingerprint'),
-                    street = getStreetLabel(fingerprints[currentFingerprint].coords),
-                    fingerprint = fingerprints[currentFingerprint].fingerprint
-                },
-                serverEventOnPickup = 'qbx_evidence:server:addFingerprintToInventory'
-            })
+            drawFingerprint(currentFingerprint)
         end
     end
 end)
