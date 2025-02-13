@@ -1,0 +1,35 @@
+{
+  "casing": {
+    "label": "Łuska",
+    "caliber": "Kaliber"
+  },
+  "blood": {
+    "label": "Kropla krwi",
+    "type": "Grupa krwi"
+  },
+  "print": {
+    "label": "Odcisk palca"
+  },
+  "collector": "Zebrane przez",
+  "location": "Znalezione w",
+  "canceled": "Anulowano",
+  "clearing_fingerprint": "Usuwanie odcisku palca...",
+  "fingerprint_cleared": "Usunięto odcisk palca!",
+  "fingerprint": "Odcisk palca",
+  "fingerprint_text": "[~g~G~s~] Odcisk palca %s",
+  "statuses": {
+    "red_hands": "Czerwone dłonie",
+    "wide_pupils": "Rozszerzone źrenice",
+    "red_eyes": "Czerwone oczy",
+    "weed_smell": "Pachnie marihuaną",
+    "gsr": "Ślady po wystrzale",
+    "chemicals": "Pachnie chemikaliami",
+    "heavy_breathing": "Ciężki oddech",
+    "sweat": "Silne pocenie się",
+    "handbleed": "Krew na dłoniach",
+    "confused": "Zdezorientowanie",
+    "alcohol": "Pachnie alkoholem",
+    "heavy_alcohol": "Bardzo wyraźnie pachnie alkoholem",
+    "agitated": "Pobudzenie – oznaki użycia metamfetaminy"
+  }
+}
