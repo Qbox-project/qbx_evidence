@@ -1,0 +1,35 @@
+{
+  "casing": {
+    "label": "Mermi kovanı",
+    "caliber": "Kalibre"
+  },
+  "blood": {
+    "label": "Kan damlası",
+    "type": "Kan tipi"
+  },
+  "print": {
+    "label": "Parmak izi"
+  },
+  "collector": "Toplayan",
+  "location": "Bulunduğu yer",
+  "canceled": "İptal edildi",
+  "clearing_fingerprint": "Parmak izi temizleniyor...",
+  "fingerprint_cleared": "Parmak izi temizlendi!",
+  "fingerprint": "Parmak izi",
+  "fingerprint_text": "[~g~G~s~] Parmak izi %s",
+  "statuses": {
+    "red_hands": "Kırmızı eller",
+    "wide_pupils": "Genişlemiş gözbebekleri",
+    "red_eyes": "Kırmızı gözler",
+    "weed_smell": "Esrar kokusu var",
+    "gsr": "Mermi kalıntısı",
+    "chemicals": "Kimyasal koku var",
+    "heavy_breathing": "Ağır nefes alıyor",
+    "sweat": "Çok terler",
+    "handbleed": "Ellerinde kan var",
+    "confused": "Kafası karışık",
+    "alcohol": "Alkol kokusu var",
+    "heavy_alcohol": "Çok fazla alkol kokuyor",
+    "agitated": "Huzursuz - Metamfetamin kullanımı belirtileri"
+  }
+}
