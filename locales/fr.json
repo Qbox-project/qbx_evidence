@@ -1,0 +1,35 @@
+{
+  "casing": {
+    "label": "Douille",
+    "caliber": "Calibre"
+  },
+  "blood": {
+    "label": "Goutte de sang",
+    "type": "Groupe sanguin"
+  },
+  "print": {
+    "label": "Empreinte digitale"
+  },
+  "collector": "Collecté par",
+  "location": "Trouvé à",
+  "canceled": "Annulé",
+  "clearing_fingerprint": "Effacement de l'empreinte...",
+  "fingerprint_cleared": "Empreinte effacée !",
+  "fingerprint": "Empreinte digitale",
+  "fingerprint_text": "[~g~G~s~] Empreinte %s",
+  "statuses": {
+    "red_hands": "Mains rouges",
+    "wide_pupils": "Pupilles dilatées",
+    "red_eyes": "Yeux rouges",
+    "weed_smell": "Sent l'herbe",
+    "gsr": "Résidus de poudre",
+    "chemicals": "Sent les produits chimiques",
+    "heavy_breathing": "Respire fortement",
+    "sweat": "Transpire beaucoup",
+    "handbleed": "Sang sur les mains",
+    "confused": "Confus",
+    "alcohol": "Sent l'alcool",
+    "heavy_alcohol": "Sent très fort l'alcool",
+    "agitated": "Agité - Signes d'usage de méthamphétamine"
+  }
+}
