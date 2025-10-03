@@ -1,0 +1,35 @@
+{
+  "casing": {
+    "label": "Patronhylster",
+    "caliber": "Kaliber"
+  },
+  "blood": {
+    "label": "Bloddråbe",
+    "type": "Blodtype"
+  },
+  "print": {
+    "label": "Fingeraftryk"
+  },
+  "collector": "Indsamlet af",
+  "location": "Fundet på",
+  "canceled": "Annulleret",
+  "clearing_fingerprint": "Renser fingeraftryk...",
+  "fingerprint_cleared": "Fingeraftryk renset!",
+  "fingerprint": "Fingeraftryk",
+  "fingerprint_text": "[~g~G~s~] Fingeraftryk %s",
+  "statuses": {
+    "red_hands": "Røde hænder",
+    "wide_pupils": "Store pupiller",
+    "red_eyes": "Røde øjne",
+    "weed_smell": "Lugter af hash/pot",
+    "gsr": "Krudtrester (GSR)",
+    "chemicals": "Lugter kemisk",
+    "heavy_breathing": "Trækker vejret tungt",
+    "sweat": "Sveder meget",
+    "handbleed": "Blod på hænderne",
+    "confused": "Forvirret",
+    "alcohol": "Lugter af alkohol",
+    "heavy_alcohol": "Lugter meget kraftigt af alkohol",
+    "agitated": "Agiteret - Tegn på meth-brug"
+  }
+}
