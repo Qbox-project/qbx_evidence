@@ -1,0 +1,35 @@
+{
+  "casing": {
+    "label": "Casquillo de bala",
+    "caliber": "Calibre"
+  },
+  "blood": {
+    "label": "Gota de sangre",
+    "type": "Tipo de sangre"
+  },
+  "print": {
+    "label": "Huella dactilar"
+  },
+  "collector": "Recopilado por",
+  "location": "Encontrado en",
+  "canceled": "Cancelado",
+  "clearing_fingerprint": "Borrando huella dactilar...",
+  "fingerprint_cleared": "¡Huella dactilar borrada!",
+  "fingerprint": "Huella dactilar",
+  "fingerprint_text": "[~g~G~s~] Huella dactilar %s",
+  "statuses": {
+    "red_hands": "Manos rojas",
+    "wide_pupils": "Pupilas dilatadas",
+    "red_eyes": "Ojos rojos",
+    "weed_smell": "Huele a marihuana",
+    "gsr": "Residuos de disparo",
+    "chemicals": "Huele a productos químicos",
+    "heavy_breathing": "Respira con dificultad",
+    "sweat": "Suda mucho",
+    "handbleed": "Manos manchadas de sangre",
+    "confused": "Confundido",
+    "alcohol": "Huele a alcohol",
+    "heavy_alcohol": "Huele mucho a alcohol",
+    "agitated": "Agitación - Señales de consumo de metanfetaminas"
+  }
+}
