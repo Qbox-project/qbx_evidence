@@ -184,6 +184,7 @@ end
 
 lib.onCache('weapon', function(weapon)
     if not weapon then return end
+    if not QBX.PlayerData.job then return end
 
     if QBX.PlayerData.job.type == 'leo' then
         if not QBX.PlayerData.job.onduty or weapon ~= `WEAPON_FLASHLIGHT` then return end
